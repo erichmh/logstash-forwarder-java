@@ -1,6 +1,8 @@
 package info.fetter.logstashforwarder;
 
 
+import java.io.BufferedReader;
+
 /*
  * Copyright 2015 Didier Fetter
  *
@@ -19,6 +21,7 @@ package info.fetter.logstashforwarder;
  */
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -35,8 +38,18 @@ public abstract class Reader {
 	private String hostname;
 	{
 		try {
-			hostname = InetAddress.getLocalHost().getHostName();
+//			hostname = InetAddress.getLocalHost().getHostName(); //original hostname method
+			
+			//added below code since above hostname method returned a different hostname than running cmd "hostname"
+	            Process p = Runtime.getRuntime().exec("hostname");
+	            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	            String line = null;
+	            while ((line = in.readLine()) != null) {
+	                hostname = line;
+	            }
 		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
